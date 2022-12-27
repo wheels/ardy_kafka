@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   # Uncomment to register a new dependency of your gem
+  spec.add_dependency 'connection_pool', '~> 2'
   spec.add_dependency 'rdkafka', '0.12.0'
   spec.add_development_dependency 'pry', '~> 0.13.1'
   spec.add_development_dependency 'rake', '~> 13.0'
