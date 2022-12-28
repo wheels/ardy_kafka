@@ -2,7 +2,7 @@ module ArdyKafka
   class Config
     attr_accessor :brokers, :shutdown_timeout, :producer_pool
 
-    attr_reader :blocking_exceptions, :non_blocking_exceptions
+    attr_reader :blocking_exceptions, :non_blocking_exceptions, :retries
 
     def defaults=(defaults)
       defaults.each do |key, val|
@@ -27,6 +27,10 @@ module ArdyKafka
       raise ArgumentError, 'producer_pool valid keys are :size and :timeout' unless pool.keys.all? { |k| [:size, :timeout].include?(k) }
 
       @producer_pool = pool
+    end
+
+    def retries=(num)
+      @retries = Integer(num)
     end
   end
 end

@@ -17,33 +17,40 @@ RSpec.describe ArdyKafka do
         expect(config.blocking_exceptions).to eq(ArdyKafka::DEFAULTS[:blocking_exceptions])
         expect(config.non_blocking_exceptions).to eq(ArdyKafka::DEFAULTS[:non_blocking_exceptions])
         expect(config.producer_pool).to eq(ArdyKafka::DEFAULTS[:producer_pool])
+        expect(config.retries).to eq(ArdyKafka::DEFAULTS[:retries])
         expect(config.shutdown_timeout).to eq(ArdyKafka::DEFAULTS[:shutdown_timeout])
       end
     end
 
     context 'with configurable settings' do
-      let(:brokers) { 'localhost:9092' }
-      let(:shutdown_timeout) { 20 }
       let(:blocking_exceptions) { [BlockingError] }
+      let(:brokers) { 'localhost:9092' }
       let(:non_blocking_exceptions) { [NonBlockingError] }
+      let(:producer_pool) { { size: 20, timeout: 10 } }
+      let(:retries) { 5 }
+      let(:shutdown_timeout) { 20 }
 
       before do
         stub_const('::BlockingError', StandardError)
         stub_const('::NonBlockingError', StandardError)
 
         ArdyKafka.configure do |c|
-          c.brokers = brokers
-          c.shutdown_timeout = shutdown_timeout
           c.blocking_exceptions = blocking_exceptions
+          c.brokers = brokers
           c.non_blocking_exceptions = non_blocking_exceptions
+          c.producer_pool = producer_pool
+          c.retries = retries
+          c.shutdown_timeout = shutdown_timeout
         end
       end
 
       it 'stores the settings', :aggregate_failures do
-        expect(config.brokers).to eq(brokers)
-        expect(config.shutdown_timeout).to eq(shutdown_timeout)
         expect(config.blocking_exceptions).to eq(blocking_exceptions)
+        expect(config.brokers).to eq(brokers)
         expect(config.non_blocking_exceptions).to eq(non_blocking_exceptions)
+        expect(config.producer_pool).to eq(producer_pool)
+        expect(config.retries).to eq(retries)
+        expect(config.shutdown_timeout).to eq(shutdown_timeout)
       end
     end
 

@@ -13,6 +13,7 @@ module ArdyKafka
       size: 10,
       timeout: 5
     },
+    retries: 3,
     shutdown_timeout: 10
   }
 
