@@ -15,6 +15,8 @@ services:
       - broker
     environment:
       ARDY_KAFKA_BROKERS: 'broker:29092'
+    volumes:
+      - ./:/ardy-tests
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.1
