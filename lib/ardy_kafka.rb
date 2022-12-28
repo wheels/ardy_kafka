@@ -2,6 +2,8 @@
 
 require_relative 'ardy_kafka/version'
 require_relative 'ardy_kafka/config'
+require_relative 'ardy_kafka/consumer'
+require_relative 'ardy_kafka/producer'
 require 'rdkafka'
 require 'connection_pool'
 
