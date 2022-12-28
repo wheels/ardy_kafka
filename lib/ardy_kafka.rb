@@ -57,4 +57,8 @@ module ArdyKafka
   def self.decode_json(str)
     JSON.parse(str)
   end
+
+  def self.test_env?
+    ENV['ARDY_KAFKA_ENV'] = 'test'
+  end
 end
