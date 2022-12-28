@@ -1,8 +1,6 @@
 # ArdyKafka
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/ardy_kafka`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+ArdyKafka is a light framework to simplify using the Ruby Rdkafka gem.
 
 ## Installation
 
@@ -16,7 +14,34 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ## Usage
 
-TODO: Write usage instructions here
+### Configuring
+
+```
+ArdyKafka.configure do |config|
+  c.brokers = 'broker:9092,broker:9093'
+end
+```
+
+All other config options are optional:
+* blocking_exceptions
+* non_blocking_exceptions
+* producer_pool (e.g. `{ size: 20, timeout: 3 }`)
+* retries
+* shutdown_timeout
+
+### Producer
+
+The `ArdyKafka::Producer` class should be called directly.
+
+```
+ArdyKafka::Producer.new.produce(topic: 'my_topic', payload: {arg: 1})
+```
+
+The primary useful features ArdyKafka provides are a pool of producer connections, sane default kafka configs and automatic JSON encoding.
+
+### Consumer
+
+TODO
 
 ## Development
 
