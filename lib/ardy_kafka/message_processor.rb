@@ -21,13 +21,10 @@ module ArdyKafka
     end
 
     def process(message)
-      puts "WTF: #{message.payload.inspect}"
-      # require 'pry'; binding.pry
       begin
-        puts "WTF: 22"
         payload = ArdyKafka.decode_json(message.payload)
+
       rescue TypeError, JSON::JSONError => e
-        puts "WTF: 1"
         maybe_send_dead_letter(message, e)
         return message
       end
@@ -49,7 +46,6 @@ module ArdyKafka
         maybe_send_dead_letter(message, e)
 
       rescue StandardError => e
-
         if retries >= ArdyKafka.config.retries
           maybe_send_dead_letter(message, e)
         else
