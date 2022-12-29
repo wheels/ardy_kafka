@@ -5,7 +5,7 @@ networks:
     name: ardy
 
 services:
-  app:
+  tests:
     build:
       context: .
       dockerfile: Dockerfile

@@ -13,7 +13,7 @@ module ArdyKafka
       @errors_topic = errors_topic
       @group_id = group_id
 
-      raise ArgumentError, 'must provide a message_dispatcher if using the default message_proessor_klass' if message_processor_klass == ArdyKafka::MessageProcessor && message_dispatcher.nil?
+      raise ArgumentError, 'must provide a message_dispatcher if using the default message_processor_klass' if message_processor_klass == ArdyKafka::MessageProcessor && message_dispatcher.nil?
 
       @message_dispatcher = message_dispatcher
       @message_processor = message_processor_klass.new(self, @message_dispatcher)
