@@ -64,4 +64,12 @@ module ArdyKafka
   def self.test_env?
     ENV['ARDY_KAFKA_ENV'] = 'test'
   end
+
+  def logger
+    return @logger if @logger
+
+    @logger = Logger.new(STDOUT)
+    @logger.level = Logger::WARN
+    @logger
+  end
 end

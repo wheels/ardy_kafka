@@ -21,6 +21,8 @@ module ArdyKafka
     end
 
     def process(message)
+      ArdyKafka.logger.info "Processing message on topic '#{message.topic}' at offset #{message.offset}"
+
       begin
         payload = ArdyKafka.decode_json(message.payload)
 
@@ -36,6 +38,8 @@ module ArdyKafka
         message_dispatcher.dispatch(payload)
 
       rescue *MessageProcessor.blocking_exceptions => e
+        ArdyKafka.logger.error "Encountered blocking error: #{e.exception}, attempts: #{attempts}"
+
         sleep 1 unless ArdyKafka.test_env?
         attempts += 1
         consumer.pause
@@ -43,12 +47,15 @@ module ArdyKafka
         retry unless ArdyKafka.test_env?
 
       rescue *MessageProcessor.non_blocking_exceptions => e
+        ArdyKafka.logger.error "Encountered non-blocking error: #{e.exception}"
         maybe_send_dead_letter(message, e)
 
       rescue StandardError => e
         if retries >= ArdyKafka.config.retries
+          ArdyKafka.logger.error "Encountered retriable error: #{e.exception}, retries exhausted, ignoring message"
           maybe_send_dead_letter(message, e)
         else
+          ArdyKafka.logger.error "Encountered retriable error: #{e.exception}, retries: #{retries}"
           retries += 1
           sleep retries**2 unless ArdyKafka.test_env?
           retry
