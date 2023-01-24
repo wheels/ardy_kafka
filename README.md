@@ -1,6 +1,6 @@
 # ArdyKafka
 
-ArdyKafka is a light framework to simplify using the Ruby Rdkafka gem.
+ArdyKafka is a light framework to simplify using the [rdkafka-ruby](https://github.com/appsignal/rdkafka-ruby) gem.
 
 ## Installation
 
