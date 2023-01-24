@@ -6,6 +6,14 @@ module ArdyKafka
     attr_reader :driver_config, :driver_consumer, :topics, :errors_topic, :message_processor, :message_dispatcher
     attr_accessor :group_id, :paused_at
 
+    # Instantiates a Consumer object. By default will provide a message processor but require the invoker to
+    #   provide a message dispatcher. If the invoker provides a message processor the message dispatcher is unnecessary.
+    # @param topics [Array<String>] the topics to consume from
+    # @param group_id [String] the consumer group id passed to the kafka brokers
+    # @param errors_topic [String, nil] the errors topic for routing unprocessable messages
+    # @param message_processor_klass [Class] the message processing class for delegating message handling
+    # @param message_dispatcher [Class] the message dispatcher that is injected into the message processor
+    # @return [Object] the consumer object
     def initialize(topics:, group_id:, errors_topic: nil, message_processor_klass: ArdyKafka::MessageProcessor, message_dispatcher: nil)
       @driver_config = Rdkafka::Config.new(kafka_config)
       @driver_consumer = @driver_config.consumer
