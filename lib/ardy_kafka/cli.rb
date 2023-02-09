@@ -25,6 +25,7 @@ module ArdyKafka
     def setup
       configure
       load_app
+      set_env
       set_signal_handlers
       set_logger_level
       validate_config!
@@ -33,7 +34,7 @@ module ArdyKafka
     def configure
       @config = ArdyKafka.config
       opts = parse_cli_options
-      @config.merge!(opts)
+      @config.attributes(opts)
     end
 
     def parse_cli_options(argv = ARGV.dup)

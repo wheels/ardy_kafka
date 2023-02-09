@@ -6,7 +6,7 @@ module ArdyKafka
     attr_reader :driver_config, :driver_consumer, :topics, :errors_topic, :message_processor, :message_dispatcher
     attr_accessor :group_id, :paused_at
 
-    # Instantiates a Consumer object. By default will provide a message processor but require the invoker to
+    # Instantiates a Consumer. By default will provide a message processor but require the invoker to
     #   provide a message dispatcher. If the invoker provides a message processor the message dispatcher is unnecessary.
     # @param topics [Array<String>] the topics to consume from
     # @param group_id [String] the consumer group id passed to the kafka brokers
@@ -39,6 +39,9 @@ module ArdyKafka
       end
     end
 
+    # Idempotent method for pausing the Consumer. If pause has already been invoked will return nil. If invoked before
+    #   the consumer has subscribed to a topic it will throw an error.
+    # @return nil
     def pause
       return if paused_at
 
@@ -47,6 +50,8 @@ module ArdyKafka
       driver_consumer.pause(topic_partition_list)
     end
 
+    # Idempotent method for resuming the Consumer. If consumer is not paused will return nil. If invoked before the
+    #   consumer has subscribed to a topic it will throw an error.
     def resume
       return unless paused_at
 
@@ -55,6 +60,11 @@ module ArdyKafka
       driver_consumer.resume(topic_partition_list)
     end
 
+    # Safe shutdown. Pauses fetching more messages, waits <shutdown_timeout> seconds to finish processing, unsubscribes
+    #   from topics, then closes the consumer.
+    #   NOTE: need to test whether offsets will be committed after the consumer has been paused. May just need to skip
+    #   the pause.
+    # @return nil
     def shutdown
       pause
       sleep ArdyKafka.config.shutdown_timeout

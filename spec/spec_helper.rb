@@ -34,7 +34,7 @@ end
 module ArdyKafka
   def self.reset_config!
     @config = Config.new.tap do |c|
-      c.defaults = DEFAULTS
+      c.attributes = DEFAULTS
     end
   end
 end

@@ -24,7 +24,7 @@ module ArdyKafka
   def self.configure(&block)
     raise ArgumentError, 'block required' unless block_given?
 
-    config.defaults = DEFAULTS.dup
+    config.attributes = DEFAULTS.dup
 
     yield config
 

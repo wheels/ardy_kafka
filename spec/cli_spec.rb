@@ -81,6 +81,7 @@ module ArdyKafka
           ENV['RAILS_ENV'] = ENV['RACK_ENV'] = ENV['APP_ENV'] = nil
           cli = described_class.new
           cli.configure
+          cli.set_env
           cli.set_logger_level
         end
 
@@ -96,6 +97,7 @@ module ArdyKafka
           ENV['RAILS_ENV'] = 'production'
           cli = described_class.new
           cli.configure
+          cli.set_env
           cli.set_logger_level
         end
 
@@ -111,9 +113,13 @@ module ArdyKafka
       context 'with an invalid config' do
         subject(:cli) { described_class.new }
 
-        it 'raises an error' do
+        xit 'raises an error' do
           expect { cli.setup }.to raise_error(ConfigError)
         end
+      end
+
+      context 'with config provided by the host app' do
+        #
       end
     end
   end

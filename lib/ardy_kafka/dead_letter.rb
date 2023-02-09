@@ -6,6 +6,11 @@ module ArdyKafka
       new(errors_topic, message, exception).produce
     end
 
+    # Instantiates a DeadLetter
+    # @param errors_topic [String] the name of the errors / dead letters topic to produce to
+    # @param message [String] the error message
+    # @param exception [Class] the exception that precipitated the dead letter
+    # @return [Object] the DeadLetter object
     def initialize(errors_topic, message, exception)
       @errors_topic = errors_topic
       @message = message

@@ -20,6 +20,13 @@ module ArdyKafka
       @message_dispatcher = message_dispatcher
     end
 
+    # Processes a Kafka message.
+    #   Will attempt to delegate the message to the provided message dispatcher. All steps are wrapped in
+    #   rescue blocks to prevent unexpected stoppages in message processing.
+    #   If the message is not valid JSON and cannot be decoded, the message will be sent to the configured
+    #   dead letters topic or discarded, and the error will be logged.
+    #   If the message encounters a blocking exception, the consumer will wait
+    # @param message [Object] an Rdkafka::Consumer::Message object
     def process(message)
       ArdyKafka.logger.info "Processing message on topic '#{message.topic}' at offset #{message.offset}"
 
@@ -27,6 +34,7 @@ module ArdyKafka
         payload = ArdyKafka.decode_json(message.payload)
 
       rescue TypeError, JSON::JSONError => e
+        ArdyKafka.logger.error "Encountered payload with invalid JSON: #{e.exception}"
         maybe_send_dead_letter(message, e)
         return message
       end
@@ -40,9 +48,9 @@ module ArdyKafka
       rescue *MessageProcessor.blocking_exceptions => e
         ArdyKafka.logger.error "Encountered blocking error: #{e.exception}, attempts: #{attempts}"
 
-        sleep 1 unless ArdyKafka.test_env?
         attempts += 1
         consumer.pause
+        sleep 1 unless ArdyKafka.test_env?
 
         retry unless ArdyKafka.test_env?
 
