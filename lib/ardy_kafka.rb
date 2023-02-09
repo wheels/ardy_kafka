@@ -8,6 +8,8 @@ require 'rdkafka'
 require 'connection_pool'
 
 module ArdyKafka
+  class ConfigError < StandardError; end
+
   DEFAULTS = {
     blocking_exceptions: [],
     non_blocking_exceptions: [],
@@ -65,7 +67,7 @@ module ArdyKafka
     ENV['ARDY_KAFKA_ENV'] = 'test'
   end
 
-  def logger
+  def self.logger
     return @logger if @logger
 
     @logger = Logger.new(STDOUT)
