@@ -1,6 +1,6 @@
 module ArdyKafka
   class Config
-    attr_accessor :brokers, :shutdown_timeout, :producer_pool
+    attr_accessor :brokers, :producer_pool, :shutdown_timeout, :require, :env
 
     attr_reader :blocking_exceptions, :non_blocking_exceptions, :retries
 
@@ -26,11 +26,20 @@ module ArdyKafka
       raise ArgumentError, 'producer_pool must be a Hash' unless pool.is_a?(Hash)
       raise ArgumentError, 'producer_pool valid keys are :size and :timeout' unless pool.keys.all? { |k| [:size, :timeout].include?(k) }
 
+      #pool[:size] = Integer(pool[:size])
+      #pool[:timeout] = Integer(pool[:timeout])
+
       @producer_pool = pool
     end
 
     def retries=(num)
       @retries = Integer(num)
+    end
+
+    def merge!(opts)
+      opts.each do |key, val|
+        self.send("#{key}=", val)
+      end
     end
   end
 end

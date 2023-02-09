@@ -3,6 +3,7 @@
 require "ardy_kafka"
 require_relative '../lib/ardy_kafka/consumer'
 require_relative '../lib/ardy_kafka/producer'
+require_relative '../lib/ardy_kafka/cli'
 
 ENV['ARDY_KAFKA_ENV'] = 'test'
 

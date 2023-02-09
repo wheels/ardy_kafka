@@ -2,6 +2,8 @@
 
 require_relative '../lib/ardy_kafka/cli'
 
+ENV['ARDY_KAFKA_ENV'] = 'test'
+
 begin
   cli = ArdyKafka::CLI.instance
   cli.run_consumer

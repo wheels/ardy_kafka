@@ -74,4 +74,8 @@ module ArdyKafka
     @logger.level = Logger::WARN
     @logger
   end
+
+  def self.log_level=(level)
+    @logger.level = level
+  end
 end
