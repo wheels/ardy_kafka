@@ -14,6 +14,10 @@ module ArdyKafka
       end
     end
 
+    # Instantiates a MessageProcessor. Expects a message dispatcher instance arg that responds to the method :dispatch
+    #   and accepts a payload arg.
+    # @param consumer [Object] an ArdyKafka::Consumer instance
+    # @param message_dispatcher [Object] a message dispatcher instance
     def initialize(consumer, message_dispatcher)
       @consumer = consumer
       @errors_topic = consumer.errors_topic
