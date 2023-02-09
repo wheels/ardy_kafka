@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require_relative '../lib/ardy_kafka/cli'
+
+begin
+  cli = ArdyKafka::CLI.instance
+  cli.run_consumer
+rescue StandardError => e
+  warn e.message
+  warn e.backtrace.join("\n")
+  exit 1
+end
