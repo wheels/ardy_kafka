@@ -26,17 +26,15 @@ Gem::Specification.new do |spec|
       (f == __FILE__) || f.match(%r{\A(?:(?:bin|test|spec|features)/|\.(?:git|travis|circleci)|appveyor)})
     end
   end
-  # spec.bindir = "exe"
-  # spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
+  spec.files << 'bin/ardy_kafka_consumer'
+  spec.bindir = 'bin'
+  spec.executables = ['ardy_kafka_consumer']
   spec.require_paths = ["lib"]
 
-  # Uncomment to register a new dependency of your gem
   spec.add_dependency 'connection_pool', '~> 2'
   spec.add_dependency 'rdkafka', '0.12.0'
   spec.add_development_dependency 'pry', '~> 0.13.1'
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
-
-  # For more information and examples about making a new gem, check out our
-  # guide at: https://bundler.io/guides/creating_gem.html
+  spec.add_development_dependency 'yard', '~> 0.9'
 end
