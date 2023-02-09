@@ -25,7 +25,14 @@ module ArdyKafka
     #   rescue blocks to prevent unexpected stoppages in message processing.
     #   If the message is not valid JSON and cannot be decoded, the message will be sent to the configured
     #   dead letters topic or discarded, and the error will be logged.
-    #   If the message encounters a blocking exception, the consumer will wait
+    #   If the message raises a blocking exception, the consumer will be paused and the process will briefly
+    #   sleep. After resuming the consumer, message processing will be attempted again. This loop will continue
+    #   infinitely.
+    #   If the message raises a non-blocking exception, the message will be sent to the configured dead letters
+    #   topic or discarded, and the error will be logged.
+    #   If the message encounters any other StandardError, the message will be retried the configured number of
+    #   times. Once the retries are exhausted, the message will be sent to the configured dead letters topic or
+    #   discarded, and the error logged.
     # @param message [Object] an Rdkafka::Consumer::Message object
     def process(message)
       ArdyKafka.logger.info "Processing message on topic '#{message.topic}' at offset #{message.offset}"
