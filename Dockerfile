@@ -6,7 +6,8 @@ RUN gem install bundler:2.3.26
 
 WORKDIR /app
 COPY . /app/
-COPY Gemfile Gemfile.lock ./
+COPY Gemfile /app/Gemfile
+COPY Gemfile.lock /app/Gemfile.lock
 
 RUN bundle install
 
