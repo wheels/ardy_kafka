@@ -3,28 +3,35 @@ require_relative 'message_processor'
 
 module ArdyKafka
   class Consumer
-    attr_reader :driver_config, :driver_consumer, :topics, :errors_topic, :message_processor, :message_dispatcher
-    attr_accessor :group_id, :paused_at
+    attr_reader :driver_config, :driver_consumer
+    attr_accessor :paused_at
 
-    # Instantiates a Consumer. By default will provide a message processor but require the invoker to
-    #   provide a message dispatcher. If the invoker provides a message processor the message dispatcher is unnecessary.
-    # @param topics [Array<String>] the topics to consume from
-    # @param group_id [String] the consumer group id passed to the kafka brokers
-    # @param errors_topic [String, nil] the errors topic for routing unprocessable messages
-    # @param message_processor_klass [Class] the message processing class for delegating message handling
-    # @param message_dispatcher [Class] the message dispatcher that is injected into the message processor
-    # @return [Object] the consumer object
-    def initialize(topics:, group_id:, errors_topic: nil, message_processor_klass: ArdyKafka::MessageProcessor, message_dispatcher: nil)
+    class << self
+      attr_reader :topics, :group_id, :errors_topic, :message_processor
+
+      # Configure the consumer
+      # @param topics [Array<String>, String] the topics to subscribe to
+      # @param group_id [String] the consumer group id passed to the kafka brokers
+      # @param errors_topic [String, nil] the errors topic for routing unprocessable messages
+      # @param message_processor [Class] the message processing class for delegating message handling
+      def consumer_config(topics:, group_id:, errors_topic: nil, message_processor: nil)
+        @topics = Array(topics)
+        @group_id = group_id
+        @errors_topic = errors_topic
+        @message_processor ||= ArdyKafka::MessageProcessor.new(self)
+      end
+    end
+
+    def initialize
       @driver_config = Rdkafka::Config.new(kafka_config)
       @driver_consumer = @driver_config.consumer
-      @topics = topics
-      @errors_topic = errors_topic
-      @group_id = group_id
+    end
 
-      raise ArgumentError, 'must provide a message_dispatcher if using the default message_processor_klass' if message_processor_klass == ArdyKafka::MessageProcessor && message_dispatcher.nil?
-
-      @message_dispatcher = message_dispatcher
-      @message_processor = message_processor_klass.new(self, @message_dispatcher)
+    # Define instance methods that call corresponding class methods
+    [:topics, :group_id, :errors_topic, :message_processor].each do |method_name|
+      define_method(method_name) do
+        self.class.send(method_name)
+      end
     end
 
     def subscribe
@@ -37,6 +44,10 @@ module ArdyKafka
         message_processor.process(message)
         commit(message)
       end
+    end
+
+    def process(message)
+      raise NotImplementedError, 'inheriting class must override #process'
     end
 
     # Idempotent method for pausing the Consumer. If pause has already been invoked will return nil. If invoked before

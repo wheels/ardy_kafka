@@ -6,13 +6,12 @@ module ArdyKafka
     let(:group_id) { 'my_consumer' }
     let(:errors_topic) { 'my_topic_errors' }
 
+    before do
+      described_class.consumer_config(topics: topics, group_id: group_id, errors_topic: errors_topic)
+    end
+
     subject(:consumer) do
-      Consumer.new(
-        topics: topics,
-        group_id: group_id,
-        errors_topic: errors_topic,
-        message_dispatcher: MyMessageDispatcher.new
-      )
+      described_class.new
     end
 
     before do
@@ -22,14 +21,17 @@ module ArdyKafka
       end
     end
 
-    describe '.initialize' do
+    describe '.consumer_config' do
       it 'sets the given attributes', :aggregate_failures do
         expect(consumer.topics).to eq(topics)
         expect(consumer.group_id).to eq(group_id)
         expect(consumer.errors_topic).to eq(errors_topic)
+        expect(consumer.message_processor).to be_an_instance_of(ArdyKafka::MessageProcessor)
       end
+    end
 
-      it 'sets the other attributes' do
+    describe '.initialize' do
+      it 'sets the internal attributes' do
         expect(consumer.driver_config).to be_a(Rdkafka::Config)
         expect(consumer.driver_consumer).to be_a(Rdkafka::Consumer)
       end

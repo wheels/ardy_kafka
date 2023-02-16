@@ -2,7 +2,7 @@ require_relative 'dead_letter'
 
 module ArdyKafka
   class MessageProcessor
-    attr_reader :consumer, :errors_topic, :message_dispatcher
+    attr_reader :consumer, :errors_topic
 
     class << self
       def blocking_exceptions
@@ -17,11 +17,9 @@ module ArdyKafka
     # Instantiates a MessageProcessor. Expects a message dispatcher instance arg that responds to the method :dispatch
     #   and accepts a payload arg.
     # @param consumer [Object] an ArdyKafka::Consumer instance
-    # @param message_dispatcher [Object] a message dispatcher instance
-    def initialize(consumer, message_dispatcher)
+    def initialize(consumer)
       @consumer = consumer
       @errors_topic = consumer.errors_topic
-      @message_dispatcher = message_dispatcher
     end
 
     # Processes a Kafka message.
@@ -54,7 +52,7 @@ module ArdyKafka
       retries = 0
 
       begin
-        message_dispatcher.dispatch(payload)
+        consumer.process(payload)
 
       rescue *MessageProcessor.blocking_exceptions => e
         ArdyKafka.logger.error "Encountered blocking error: #{e.exception}, attempts: #{attempts}"

@@ -13,17 +13,12 @@ module ArdyKafka
     end
     let(:errors_topic) { 'my_errors_topic' }
     let(:consumer) do
-      Consumer.new(
-        topics: topics,
-        group_id: group_id,
-        errors_topic: errors_topic,
-        message_dispatcher: message_dispatcher
-      )
+      MyConsumer.consumer_config(topics: topics, group_id: group_id)
+      MyConsumer.new
     end
-    let(:message_dispatcher) { MyMessageDispatcher.new }
 
     describe '#process' do
-      let(:message_processor) { described_class.new(consumer, message_dispatcher) }
+      let(:message_processor) { described_class.new(consumer) }
 
       subject(:process) { message_processor.process(message_double) }
 
@@ -55,14 +50,14 @@ module ArdyKafka
             config.blocking_exceptions = [exception]
           end
 
-          allow(message_dispatcher).to receive(:dispatch).with(message_payload).and_raise(exception)
+          allow(consumer).to receive(:process).with(message_payload).and_raise(exception)
         end
 
         let(:exception) { PGConnectionBad }
 
         # TODO: simluate the job recovering instead of short-circuiting the retry call in test env
         it 'pauses the consumer while retrying and resumes after', :aggregate_failures do
-          expect(message_dispatcher).to receive(:dispatch).with(message_payload)
+          expect(consumer).to receive(:process).with(message_payload)
           expect(consumer).to receive(:pause)
           expect(consumer).to receive(:resume)
           process
@@ -79,11 +74,11 @@ module ArdyKafka
 
         before do
           stub_const('::RecordNotFound', StandardError)
-          allow(message_dispatcher).to receive(:dispatch).with(message_payload).and_raise(exception)
+          allow(consumer).to receive(:process).with(message_payload).and_raise(exception)
         end
 
         it 'sends the message to dead letters and warns instead of raising the error', :aggregate_failures do
-          expect(message_dispatcher).to receive(:dispatch).with(message_payload)
+          expect(consumer).to receive(:process).with(message_payload)
           expect(DeadLetter).to receive(:produce).with(errors_topic, message_double, exception)
           expect { process }.not_to raise_error
         end
@@ -93,15 +88,15 @@ module ArdyKafka
         before do
           stub_const('::ThirdPartyApiError', StandardError)
 
-          allow(message_dispatcher).to receive(:dispatch).with(message_payload).twice.and_raise(exception)
-          allow(message_dispatcher).to receive(:dispatch).with(message_payload).once
+          allow(consumer).to receive(:process).with(message_payload).twice.and_raise(exception)
+          allow(consumer).to receive(:process).with(message_payload).once
         end
 
         let(:exception) { ThirdPartyApiError }
 
         context 'when recovers' do
           xit 'retries until succeeding, does not send to dead letters', :aggregate_failures do
-            expect(message_dispatcher).to receive(:dispatch).with(message_payload).exactly(3).times
+            expect(consumer).to receive(:process).with(message_payload).exactly(3).times
             expect(DeadLetter).not_to receive(:produce)
             process
           end
@@ -109,16 +104,16 @@ module ArdyKafka
 
         context 'when cannot recover' do
           before do
-            allow(message_dispatcher).to receive(:dispatch).with(message_payload).exactly(4).times.and_raise(exception)
+            allow(consumer).to receive(:process).with(message_payload).exactly(4).times.and_raise(exception)
           end
 
           it 'warns with the error and retries the job', :aggregate_failures do
-            expect(message_dispatcher).to receive(:dispatch).with(message_payload)
+            expect(consumer).to receive(:process).with(message_payload)
             process
           end
 
           it 'sends the message to dead letters after exhausting retries', :aggregate_failures do
-            expect(message_dispatcher).to receive(:dispatch).with(message_payload)
+            expect(consumer).to receive(:consumer).with(message_payload)
             expect(DeadLetter).to receive(:produce).with(errors_topic, message_double, exception)
             process
           end
@@ -127,12 +122,12 @@ module ArdyKafka
 
       context 'with a valid payload that can be processed' do
         it 'performs the job' do
-          expect(message_dispatcher).to receive(:dispatch)#.with(message_payload).once
+          expect(consumer).to receive(:process)#.with(message_payload).once
           process
         end
 
         it 'deregisters the job after performing', :aggregate_failures do
-          expect(message_dispatcher).to receive(:dispatch)#.with(message_payload).once
+          expect(consumer).to receive(:process)#.with(message_payload).once
           process
         end
       end
