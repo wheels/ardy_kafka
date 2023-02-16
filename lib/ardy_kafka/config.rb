@@ -1,6 +1,6 @@
 module ArdyKafka
   class Config
-    attr_accessor :brokers, :producer_pool, :shutdown_timeout, :require, :env
+    attr_accessor :brokers, :producer_pool, :shutdown_timeout, :require, :env, :consumer_klass
 
     attr_reader :blocking_exceptions, :non_blocking_exceptions, :retries
 

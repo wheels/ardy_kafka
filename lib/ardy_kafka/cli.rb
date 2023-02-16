@@ -28,18 +28,23 @@ module ArdyKafka
       set_env
       set_signal_handlers
       set_logger_level
+      set_consumer
       validate_config!
     end
 
     def configure
       @config = ArdyKafka.config
       opts = parse_cli_options
-      @config.attributes(opts)
+      @config.attributes = opts
     end
 
     def parse_cli_options(argv = ARGV.dup)
       opts = {}
       parser = OptionParser.new do |opt|
+        opt.on '--consumer CLASSNAME', 'Specify the consumer classname' do |arg|
+          opts[:consumer_klass] = String(arg)
+        end
+
         opt.on '-e', '--env ENV', 'Set the environment' do |arg|
           opts[:env] = String(arg)
         end
@@ -117,8 +122,13 @@ module ArdyKafka
       ArdyKafka.logger.level = LOGGER_LEVEL_MAP[@config.env]
     end
 
+    def set_consumer
+      @consumer = Object.const_get(@config.consumer_klass).new
+    end
+
     def validate_config!
       raise ConfigError, 'brokers config is required' unless @config.brokers
+      # raise ConfigError, 'valid consumer classname is required' unless @consumer
     end
   end
 end
